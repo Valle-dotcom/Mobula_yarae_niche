@@ -306,6 +306,7 @@ corrplot(matriz_cor, method = "number", type = "lower",
 Vamos a utilizar el paquete de R [*ellipsenm* (Cobos et al. 2020)](https://github.com/marlonecobos/ellipsenm2) para realizar el modelo. La instalación de este paquete se realiza de la siguiente manera:
 
 ```r
+
 # Installing and loading packages
 if(!require(remotes)){
     install.packages("remotes")
