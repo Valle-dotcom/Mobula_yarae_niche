@@ -8,7 +8,7 @@ title: "Ejercicio de modelado de nicho de Mobula yarae"
   <a href="#paso-2">II. </a> |
   <a href="#paso-3">III. </a> |
   <a href="#paso-4">Paso</a> |
-  <a href="#paso-5">Anexo: Instalación de ellipsenm
+  <a href="#paso-5">Anexo: Instalación de ellipsenm</a> |
 </nav>
 
 ---
