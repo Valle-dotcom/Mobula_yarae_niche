@@ -8,7 +8,7 @@ title: "Ejercicio de modelado de nicho de Mobula yarae"
   <a href="#paso-2">II. </a> |
   <a href="#paso-3">III. </a> |
   <a href="#paso-4">Paso</a> |
-  <a href="#paso-5">Paso</a>
+  <a href="#paso-5">Anexo: Instalación de ellipsenm
 </nav>
 
 ---
@@ -302,7 +302,21 @@ corrplot(matriz_cor, method = "number", type = "lower",
 - Ejecución
 
 <a id="paso-5"></a>
-## Paso 5 — Resultados
+## Anexo — Instalación de ellipsenm
+Vamos a utilizar el paquete de R [*ellipsenm* (Cobos et al. 2020)](https://github.com/marlonecobos/ellipsenm2) para realizar el modelo. La instalación de este paquete se realiza de la siguiente manera:
+
+```r
+# Installing and loading packages
+if(!require(remotes)){
+    install.packages("remotes")
+}
+if(!require(ellipsenm)){
+    remotes::install_github("marlonecobos/ellipsenm2")
+}
+library(ellipsenm)
+
+```
+
 - Mapas
 - Métricas
 - Exportar productos
