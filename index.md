@@ -5,7 +5,7 @@ title: "Ejercicio de modelado de nicho de Mobula yarae"
 # Flujo de trabajo
 <nav>
   <a href="#paso-1">I. Preparación de datos</a> |
-  <a href="#paso-2">II. </a> |
+  <a href="#paso-2">II. Calibración del modelo</a> |
   <a href="#paso-3">III. </a> |
   <a href="#paso-4">Paso</a> |
   <a href="#paso-5">Anexo: Instalación de ellipsenm</a> |
@@ -281,13 +281,158 @@ corrplot(matriz_cor, method = "number", type = "lower",
 
 
 
-*CONTINUARÁ..........*
+
 
 <a id="paso-2"></a>
-## Paso 2 — Datos
-- Descargar datos
-- Limpiar datos
-- Formato esperado
+## II. Calibración del modelo
+
+```r
+
+##########################################################
+#######    Modelado de nicho con ellipsenm ###############
+##########################################################
+
+#
+setwd("ruta_a_tu_directorio")
+
+#
+library(terra)
+library(car)
+library(ellipsenm)
+help(ellipsenm)
+
+
+# 
+occurrences <- read.csv("input/m_yarae.csv")    
+colnames(occurrences)
+
+#
+vars <- terra::rast(list.files(path = "input/variables/presente/variables_s", pattern = "\\.tif$", full.names = TRUE))
+print(names(vars))
+
+
+#
+data_split <- split_data(occurrences, method = "random", longitude = "longitude",
+                         latitude = "latitude", train_proportion = 0.75)
+
+
+#
+my_pool <- c("bathy_5m", "biogeo09_5m", "biogeo16_5m")
+
+all_sets <- list() 
+
+# Loop from k=2 (minimum) to k=8 (maximum)
+for (k in 2:length(my_pool)) {
+  
+  # Generate combinations for size k
+  combos_k <- combn(my_pool, k, simplify = FALSE)
+  
+  # Add them to the main list
+  all_sets <- c(all_sets, combos_k)
+}
+
+# Give them unique names (Required for prepare_sets)
+names(all_sets) <- paste0("Set_", 1:length(all_sets))
+
+print(paste("Generated", length(all_sets), "combinations."))
+
+
+
+# 
+variable_sets_all <- prepare_sets(vars, all_sets)
+
+#
+methods <- c("covmat", "mve1", "mve2")
+
+# 
+calib <- ellipsoid_calibration(data = data_split, species = "scientific_name",
+                               longitude = "longitude", latitude = "latitude",
+                               variables = vars, methods = methods,
+                               level = 95, selection_criteria = "S_OR_P",
+                               error = 5, iterations = 500, percentage = 75,
+                               output_directory = "calibration_results",
+                               format = "GTiff")
+
+class(calib)
+
+best_vars <- variable_sets_all[["set_1"]]
+
+variable_sets_all$variable_sets$set_1
+
+#
+base_path <- "input/variables/pasado" 
+
+# 
+files_umg <- list.files(file.path(base_path, "LGM"), pattern = "\\.tif$", full.names = TRUE)
+files_miho <- list.files(file.path(base_path, "M-Ho"), pattern = "\\.tif$", full.names = TRUE)
+
+escenario_1 <- rast(files_umg)
+escenario_2 <- rast(files_miho)
+
+names(escenario_1)
+names(escenario_2)
+
+
+# 
+projections_list <- list(
+  LGM = escenario_1,
+  MidHolocene = escenario_2
+)
+
+
+#
+
+ell_model <- ellipsoid_model(data = occurrences, species = "species",
+                              longitude = "longitude", latitude = "latitude",
+                              raster_layers = vars, method = "mve1", level = 95,
+                              replicates = 100, replicate_type = "subsample",
+                              percentage = 90, projection_variables = projections_list,
+                              prvariables_format = "GTiff",
+                              prediction = "suitability", return_numeric = TRUE,
+                              format = "GTiff", overwrite = FALSE,
+                              output_directory = "output")
+
+#
+centro_final <- ell_model@ellipsoids$mean_ellipsoid@centroid
+matriz_cov_final <- ell_model@ellipsoids$mean_ellipsoid@covariance_matrix
+
+# 
+clima_puntos <- terra::extract(variables_s, 
+                               occurrences[, c("longitude", "latitude")])
+if(colnames(clima_puntos)[1] == "ID") { clima_puntos <- clima_puntos[, -1] }
+
+
+#
+coordenadas_elipse <- car::ellipse(center = centro_final, 
+                                   shape = matriz_cov_final, 
+                                   radius = radio_95, 
+                                   draw = FALSE) 
+
+#
+limite_x <- range(c(clima_puntos[, 1], coordenadas_elipse[, 1]))
+limite_y <- range(c(clima_puntos[, 2], coordenadas_elipse[, 2]))
+
+
+#
+plot(x = clima_puntos[, 1], 
+     y = clima_puntos[, 2], 
+     pch = 16, col = "red", cex = 1.2,
+     xlab = names(variables_s)[1],
+     ylab = names(variables_s)[2],
+     main = "Elipsoide (Espacio E)")
+
+#
+radio_95 <- sqrt(qchisq(0.95, df = 2))
+
+# 
+car::ellipse(center = centro_final, 
+             shape = matriz_cov_final, 
+             radius = radio_95, 
+             col = "blue", 
+             fill = FALSE, 
+             lwd = 3)
+```
+*CONTINUARÁ..........*
 
 <a id="paso-3"></a>
 ## Paso 3 — Variables ambientales
