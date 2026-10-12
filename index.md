@@ -8,7 +8,8 @@ title: "Ejercicio de modelado de nicho de Mobula yarae"
   <a href="#paso-2">II. Calibración del modelo</a> |
   <a href="#paso-3">III. </a> |
   <a href="#paso-4">Paso</a> |
-  <a href="#paso-5">Anexo: Instalación de ellipsenm</a> |
+  <a href="#paso-5">Análisis mop</a> |
+  <a href="#paso-6">Anexo: Instalación de ellipsenm</a> |
 </nav>
 
 ---
@@ -447,6 +448,58 @@ car::ellipse(center = centro_final,
 - Ejecución
 
 <a id="paso-5"></a>
+## Paso 5 — Análisis MOP 
+
+```r
+# Cargar las librerías
+library(mop)
+library(terra)
+
+#Recuerda definir tu directorio de trabajo antes (setwd) y tener un orden para acomodar lso respectivos resultados 
+# de los análisis
+
+# Cargar capas al presente (capas que usaste en la calibración). Recuerda cambiar las rutas
+capas_referencia <- terra::rast("ruta/a/tus/capas_actuales/variables.tif")
+
+# Cargar capas climáticas usadas en las traneferencias 
+capas_escenario_1 <- terra::rast("ruta/a/tus/capas de tranferencia/escenario_ssp245_2050.tif")
+
+# Análisis MOP
+# Te recomiendo que consultes a detalle los argumentos para tus análisis con "help(mop)"
+mop_escenario_1 <- mop(m = capas_referencia, 
+                       g = capas_escenario_1, 
+                       type = "detailed", 
+                       calculate_distance = TRUE, 
+                       where_distance = "all", 
+                       distance = "euclidean", 
+                       scale = TRUE, 
+                       center = TRUE)
+
+# Resumen del análisis
+summary(mop_escenario_1)
+
+# Visualización del Mapa binario de extrapolación
+terra::plot(mop_escenario_1$mop_basic, main = "Zonas de extrapolación estricta según el MOP")
+
+# Guardar los mapas en tif
+# Guarda el mapa binario (0 = Condiciones análogas 1 = Condiciones no análogas)
+terra::writeRaster(mop_escenario_1$mop_basic, 
+                   filename = "output/MOP_basico_ssp245_2050.tif", 
+                   overwrite = TRUE)
+
+# Guarda el mapa continuo (distancia ambiental)
+terra::writeRaster(mop_escenario_1$mop_distance, 
+                   filename = "output/MOP_distancia_ssp245_2050.tif", 
+                   overwrite = TRUE)
+
+# Para evaluar tu siguiente transferencia (escenario), simplemente repites el bloque
+# anterior cambiando las rutas de lectura y los nombres de salida
+```
+
+Consultar la [página de github](https://github.com/marlonecobos/mop) del paquete mop para mayor detalle
+También en el manual mencionado al inicio de esta página hay una breve sección sobre este tipo de análisis
+
+<a id="paso-6"></a>
 ## Anexo — Instalación de ellipsenm
 Vamos a utilizar el paquete de R [*ellipsenm* (Cobos et al. 2020)](https://github.com/marlonecobos/ellipsenm2) para realizar el modelo. La instalación de este paquete se realiza de la siguiente manera:
 
