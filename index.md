@@ -499,8 +499,7 @@ terra::writeRaster(mop_escenario_1$mop_distance,
 # anterior cambiando las rutas de lectura y los nombres de salida
 ```
 
-Consultar la [página de github](https://github.com/marlonecobos/mop) del paquete mop para mayor detalle
-También en el manual mencionado al inicio de esta página hay una breve sección sobre este tipo de análisis
+Consultar la [página de github](https://github.com/marlonecobos/mop) del paquete mop para mayor detalle. También en el manual de Simoes et al. (2020) mencionado al inicio de esta página contiene una breve sección dedicada este tipo de análisis.
 
 <a id="paso-6"></a>
 ## Anexo — Instalación de ellipsenm
