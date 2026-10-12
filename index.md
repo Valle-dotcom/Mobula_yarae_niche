@@ -451,6 +451,9 @@ car::ellipse(center = centro_final,
 ## Paso 5 — Análisis MOP 
 
 ```r
+# Instalar paquete desde el CRAN
+install.packages("mop")
+
 # Cargar las librerías
 library(mop)
 library(terra)
